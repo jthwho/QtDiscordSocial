@@ -11,6 +11,7 @@
 #include <QObject>
 #include "discordpp.h"
 
+class ImageCache;
 class QTimer;
 
 class DiscordObject : public QObject {
@@ -24,12 +25,17 @@ class DiscordObject : public QObject {
 
     signals:
         void ready();
+        void userAdded(quint64 userID, const QString &name);
+        void userAvitarChanged(quint64 userID, const QImage &image);
 
     private slots:
         void housekeeping();
 
     private:
-        QTimer  *_housekeepingTimer = nullptr;
+        QTimer      *_housekeepingTimer = nullptr;
+        ImageCache  *_imageCache = nullptr;
+
         bool setup();
+        void doPreReadyTasks();
 };
 

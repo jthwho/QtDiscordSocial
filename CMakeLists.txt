@@ -45,7 +45,7 @@ endif()
 
 
 # Find the Qt6 package
-find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets)
+find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets Network)
 
 # Enable automatic MOC, UIC, and RCC
 set(CMAKE_AUTOMOC ON)
@@ -59,6 +59,8 @@ add_executable(${PROJECT_NAME}
     discordobject.cpp
     mainwindow.h
     mainwindow.cpp
+    imagecache.h
+    imagecache.cpp
 )
 
 # Include directories
@@ -67,7 +69,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC
     ${PROJECT_SOURCE_DIR}/include
 )
 
-target_link_libraries(${PROJECT_NAME} PRIVATE Qt6::Core Qt6::Gui Qt6::Widgets ${DISCORD_LIB_PATH})
+target_link_libraries(${PROJECT_NAME} PRIVATE Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Network ${DISCORD_LIB_PATH})
 
 # Enable warnings
 if (MSVC)

@@ -17,16 +17,17 @@
 #define DISCORDPP_IMPLEMENTATION
 
 #include "discordobject.h"
+#include "imagecache.h"
 #include <QTimer>
 #include <QtDebug>
 
-// Replace with your Discord Application ID
-//const uint64_t APPLICATION_ID = 1362903946099949889;
-const uint64_t APPLICATION_ID = 1362900698316013760; // SocialSDKTest1
+const uint64_t APPLICATION_ID = 1362900698316013760;
 
 DiscordObject::DiscordObject(QObject *p) : 
-    QObject(p)
+    QObject(p),
+    _imageCache(new ImageCache(this))
 {
+    connect(_imageCache, &ImageCache::imageLoaded, this, &DiscordObject::userAvitarChanged);
     setup();
 }
 
@@ -50,6 +51,7 @@ bool DiscordObject::setup() {
             qInfo() << "Status changed: " << discordpp::Client::StatusToString(status).c_str();
             if(status == discordpp::Client::Status::Ready) {
                 qInfo("Client is ready! You can now call SDK functions.");
+                doPreReadyTasks();
                 emit ready();
             } else if(error != discordpp::Client::Error::None) {
                 qInfo("Connection Error: %s, code %d", discordpp::Client::ErrorToString(error).c_str(), errorDetail);
@@ -106,6 +108,20 @@ bool DiscordObject::auth() {
 
 void DiscordObject::housekeeping() {
     discordpp::RunCallbacks();
+    return;
+}
+
+void DiscordObject::doPreReadyTasks() {
+    // Fetch all the friend avitars
+    auto list = client.GetRelationships();
+    for(const auto &i : list) {
+        auto user = i.User();
+        if(!user) continue;
+        emit userAdded(user->Id(), QString::fromStdString(user->DisplayName()));
+        QString url = QString::fromStdString(user->AvatarUrl(discordpp::UserHandle::AvatarType::Png, discordpp::UserHandle::AvatarType::Png));
+        qInfo("Fetching avitar for %s (%llu): %s", user->DisplayName().c_str(), (unsigned long long)user->Id(), qPrintable(url));
+        _imageCache->loadImage(user->Id(), url);
+    }
     return;
 }
 

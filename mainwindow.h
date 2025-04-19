@@ -11,6 +11,7 @@
 #include <QMainWindow>
 
 class QListWidget;
+class QListWidgetItem;
 class DiscordObject;
 
 class MainWindow : public QMainWindow {
@@ -19,10 +20,13 @@ class MainWindow : public QMainWindow {
         MainWindow(QWidget *parent = nullptr);
 
     public slots:
-        void updateFriendList();
+        void friendUpdate(quint64 id, const QString &name);
+        void friendUpdateAvitar(quint64 id, const QImage &image);
 
     private:
         DiscordObject   *_discord = nullptr;
         QListWidget     *_friendList = nullptr;
+
+        QListWidgetItem *findById(quint64 id) const;
 };
 
